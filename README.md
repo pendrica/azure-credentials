@@ -133,16 +133,16 @@ INFO [2016-03-28 16:02:26] Assigned service principal to role Contributor in sub
 INFO [2016-03-28 16:02:26] Creating credentials file at C:/Users/StuartPreston/azure-credentials/azure.conf
 azure: {
  subscription_id: "b6e7eee9-e4cd-41ae-8432-03ab624df016"
- tenant_id: '9c117323-1f20-444d-82a9-9ee430723ba3'
- client_id: '8dfab0fc-65c5-46d0-be1d-d5d301b3cbc9'
- client_secret: 'm_nh57rEZpGe5GFL8-Iceg=='
+ tenant_id: "9c117323-1f20-444d-82a9-9ee430723ba3"
+ client_id: "8dfab0fc-65c5-46d0-be1d-d5d301b3cbc9"
+ client_secret: "m_nh57rEZpGe5GFL8-Iceg=="
 }
 
 azure: {
  subscription_id: "bcf669fc-98b4-4e51-8ab0-e2d1f9f4b1c3"
- tenant_id: '9c117323-1f20-444d-82a9-9ee430723ba3'
- client_id: '951eab1c-7e77-4931-bb68-15ca2d05e69e'
- client_secret: 'vzl0haDXU51OukanIiRwJQ=='
+ tenant_id: "9c117323-1f20-444d-82a9-9ee430723ba3"
+ client_id: "951eab1c-7e77-4931-bb68-15ca2d05e69e"
+ client_secret: "vzl0haDXU51OukanIiRwJQ=="
 }
 
 INFO [2016-03-28 16:02:26] Done!

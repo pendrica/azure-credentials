@@ -190,9 +190,9 @@ provider "azurerm" {
             subscription_template = <<-EOH
 azure: {
  subscription_id: "#{s[:subscription_id]}"
- tenant_id: '#{s[:tenant_id]}'
- client_id: '#{s[:client_id]}'
- client_secret: '#{s[:client_secret]}'
+ tenant_id: "#{s[:tenant_id]}"
+ client_id: "#{s[:client_id]}"
+ client_secret: "#{s[:client_secret]}"
 }
 
               EOH
