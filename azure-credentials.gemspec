@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = 'azure-credentials'
-  spec.version       = '0.1.2'
+  spec.version       = '0.1.3'
   spec.authors       = ['Stuart Preston']
   spec.email         = ['stuart@pendrica.com']
   spec.summary       = 'AzureRM credential generator'
@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir['LICENSE', 'README.md', 'CHANGELOG.md', 'lib/**/*', 'bin/**/*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'json', '~> 1.8', '= 1.8.2'
+  spec.add_dependency 'json', '~> 1.8', '>= 1.8.3'
   spec.add_dependency 'mixlib-cli', '~> 1', '= 1.5.0'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
