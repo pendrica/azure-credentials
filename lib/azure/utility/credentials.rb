@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'io/console'
 require 'net/http'
 require 'uri'
@@ -38,7 +40,7 @@ module Azure
              short: '-r',
              long: '--role ROLENAME',
              description: 'Enter the built-in Azure role to add the service principal to on your subscription (default: Contributor)',
-             in: %w(Contributor Owner),
+             in: %w[Contributor Owner],
              default: 'Contributor',
              required: false
 
@@ -46,7 +48,7 @@ module Azure
              short: '-t',
              long: '--type OUTPUTTYPE',
              description: 'Set the output type (default: chef)',
-             in: %w(chef puppet terraform generic),
+             in: %w[chef puppet terraform generic],
              required: false,
              default: 'chef'
 
@@ -56,7 +58,7 @@ module Azure
              description: 'Set the log level (debug, info, warn, error, fatal)',
              default: :info,
              required: false,
-             in: %w(debug info warn error fatal),
+             in: %w[debug info warn error fatal],
              proc: proc { |l| l.to_sym }
 
       option :output_file,
@@ -103,15 +105,15 @@ module Azure
       def self.logger_level_for(sym)
         case sym
         when :debug
-          return Logger::DEBUG
+          Logger::DEBUG
         when :info
-          return Logger::INFO
+          Logger::INFO
         when :warn
-          return Logger::WARN
+          Logger::WARN
         when :error
-          return Logger::ERROR
+          Logger::ERROR
         when :fatal
-          return Logger::FATAL
+          Logger::FATAL
         end
       end
     end
@@ -120,8 +122,8 @@ module Azure
     # Credentials
     #
     class Credentials
-      AZURE_SERVICE_PRINCIPAL = '1950a258-227b-4e31-a9cf-717495945fc2'.freeze
-      CONFIG_PATH = "#{ENV['HOME']}/.azure/credentials".freeze
+      AZURE_SERVICE_PRINCIPAL = '1950a258-227b-4e31-a9cf-717495945fc2'
+      CONFIG_PATH = "#{ENV['HOME']}/.azure/credentials"
 
       def initialize
         cli = Options.new
@@ -164,50 +166,50 @@ module Azure
         case style
         when 'chef' # ref: https://github.com/pendrica/chef-provisioning-azurerm#configuration
           created_credentials.each do |s|
-            subscription_template = <<-EOH
-[#{s[:subscription_id]}]
-client_id = "#{s[:client_id]}"
-client_secret = "#{s[:client_secret]}"
-tenant_id = "#{s[:tenant_id]}"
+            subscription_template = <<~CHEFEOH
+              [#{s[:subscription_id]}]
+              client_id = "#{s[:client_id]}"
+              client_secret = "#{s[:client_secret]}"
+              tenant_id = "#{s[:tenant_id]}"
 
-            EOH
+            CHEFEOH
             output += subscription_template
           end
         when 'terraform' # ref: https://www.terraform.io/docs/providers/azurerm/index.html
           created_credentials.each do |s|
-            subscription_template = <<-EOH
-provider "azurerm" {
-  subscription_id = "#{s[:subscription_id]}"
-  client_id       = "#{s[:client_id]}"
-  client_secret   = "#{s[:client_secret]}"
-  tenant_id       = "#{s[:tenant_id]}"
-}
+            subscription_template = <<~TFEOH
+              provider "azurerm" {
+                subscription_id = "#{s[:subscription_id]}"
+                client_id       = "#{s[:client_id]}"
+                client_secret   = "#{s[:client_secret]}"
+                tenant_id       = "#{s[:tenant_id]}"
+              }
 
-              EOH
+            TFEOH
             output += subscription_template
           end
         when 'puppet' # ref: https://github.com/puppetlabs/puppetlabs-azure#installing-the-azure-module
           created_credentials.each do |s|
-            subscription_template = <<-EOH
-azure: {
- subscription_id: "#{s[:subscription_id]}"
- tenant_id: "#{s[:tenant_id]}"
- client_id: "#{s[:client_id]}"
- client_secret: "#{s[:client_secret]}"
-}
+            subscription_template = <<~PPEOH
+              azure: {
+                subscription_id: "#{s[:subscription_id]}"
+                tenant_id: "#{s[:tenant_id]}"
+                client_id: "#{s[:client_id]}"
+                client_secret: "#{s[:client_secret]}"
+              }
 
-              EOH
+            PPEOH
             output += subscription_template
           end
         else # generic credentials output
           created_credentials.each do |s|
-            subscription_template = <<-EOH
-azure_subscription_id = "#{s[:subscription_id]}"
-azure_tenant_id = "#{s[:tenant_id]}"
-azure_client_id = "#{s[:client_id]}"
-azure_client_secret = "#{s[:client_secret]}"
+            subscription_template = <<~GENERICEOH
+              azure_subscription_id = "#{s[:subscription_id]}"
+              azure_tenant_id = "#{s[:tenant_id]}"
+              azure_client_id = "#{s[:client_id]}"
+              azure_client_secret = "#{s[:client_secret]}"
 
-              EOH
+            GENERICEOH
             output += subscription_template
           end
         end
@@ -271,7 +273,7 @@ azure_client_secret = "#{s[:client_secret]}"
       def create_application(tenant_id, token, new_application_name, new_client_secret)
         CustomLogger.log.info "Creating application #{new_application_name} in tenant #{tenant_id}"
         url = "https://graph.windows.net/#{tenant_id}/applications?api-version=1.42-previewInternal"
-        payload_json = <<-EOH
+        payload_json = <<-JSONEOH
         {
             "availableToOtherTenants": false,
             "displayName": "#{new_application_name}",
@@ -288,33 +290,33 @@ azure_client_secret = "#{s[:client_secret]}"
                 }
             ]
         }
-        EOH
+        JSONEOH
         azure_call(:post, url, payload_json, token)
       end
 
       def create_service_principal(tenant_id, token, application_id)
         CustomLogger.log.info 'Creating service principal for application'
         url = "https://graph.windows.net/#{tenant_id}/servicePrincipals?api-version=1.42-previewInternal"
-        payload_json = <<-EOH
+        payload_json = <<-PAYLOADEOH
         {
             "appId": "#{application_id}",
             "accountEnabled": true
         }
-        EOH
+        PAYLOADEOH
         azure_call(:post, url, payload_json, token)
       end
 
       def assign_service_principal_to_role_id(subscription_id, token, service_principal_object_id, role_definition_id)
         CustomLogger.log.info 'Attempting to assign service principal to role'
         url = "https://management.azure.com/subscriptions/#{subscription_id}/providers/Microsoft.Authorization/roleAssignments/#{service_principal_object_id}?api-version=2015-07-01"
-        payload_json = <<-EOH
+        payload_json = <<-PAYLOADEOH
         {
             "properties": {
                 "roleDefinitionId": "#{role_definition_id}",
                 "principalId": "#{service_principal_object_id}"
             }
         }
-        EOH
+        PAYLOADEOH
         azure_call(:put, url, payload_json, token)
       end
 
