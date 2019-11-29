@@ -1,5 +1,9 @@
 # azure-credentials changelog
 
+## v0.1.5 (2019-11-29)
+- Add support for Azure CLI format (@rdonkin)
+- Fix dependencies for bundled installs (@rdonkin)
+
 ## v0.1.4 (2018-09-28)
 
 - Adding bundler configuration, fix style issues (@stuartpreston)
