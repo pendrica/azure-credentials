@@ -48,7 +48,7 @@ module Azure
              short: '-t',
              long: '--type OUTPUTTYPE',
              description: 'Set the output type (default: chef)',
-             in: %w[chef puppet terraform generic],
+             in: %w[chef puppet terraform azurecli generic],
              required: false,
              default: 'chef'
 
@@ -201,6 +201,18 @@ module Azure
             PPEOH
             output += subscription_template
           end
+        when 'azurecli'
+          created_credentials.each do |s|
+            subscription_template = <<~AZURECLIEOH
+              [default]
+              subscription_id=#{s[:subscription_id]}
+              tenant=#{s[:tenant_id]}
+              client_id=#{s[:client_id]}
+              secret=#{s[:client_secret]}
+
+            AZURECLIEOH
+            output += subscription_template
+          end
         else # generic credentials output
           created_credentials.each do |s|
             subscription_template = <<~GENERICEOH
@@ -227,7 +239,13 @@ module Azure
         credentials = []
         subscriptions.each do |subscription|
           new_application_name = "azure_#{identifier}_#{subscription}"
-          new_client_secret = SecureRandom.urlsafe_base64(16, true)
+
+          if config[:type] == 'azurecli' then
+            new_client_secret = SecureRandom.uuid
+          else
+            new_client_secret = SecureRandom.urlsafe_base64(16, true)
+          end
+
           application_id = create_application(tenant_id, token, new_application_name, new_client_secret)['appId']
           service_principal_object_id = create_service_principal(tenant_id, token, application_id)['objectId']
           role_name = config[:role] || 'Contributor'
