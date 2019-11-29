@@ -122,7 +122,8 @@ module Azure
     # Credentials
     #
     class Credentials
-      AZURE_SERVICE_PRINCIPAL = '1950a258-227b-4e31-a9cf-717495945fc2'
+      AZURE_SERVICE_PRINCIPAL = '1950a258-227b-4e31-a9cf-717495945fc2'      # Well-known client ID
+      RETRY_COUNT = 50        # Handle delayed creation of service principal
       CONFIG_PATH = "#{ENV['HOME']}/.azure/credentials"
 
       def initialize
@@ -237,6 +238,7 @@ module Azure
         subscriptions = get_subscriptions(token) if subscriptions.empty?
         identifier = SecureRandom.hex(2)
         credentials = []
+
         subscriptions.each do |subscription|
           new_application_name = "azure_#{identifier}_#{subscription}"
 
@@ -246,13 +248,16 @@ module Azure
             new_client_secret = SecureRandom.urlsafe_base64(16, true)
           end
 
+          # Create application and service principal
           application_id = create_application(tenant_id, token, new_application_name, new_client_secret)['appId']
           service_principal_object_id = create_service_principal(tenant_id, token, application_id)['objectId']
           role_name = config[:role] || 'Contributor'
           role_definition_id = get_role_definition(subscription, token, role_name).first['id']
+
+          # Assign service principal to role, with retries until SP is visible in directory
           success = false
           counter = 0
-          until success || counter > 5
+          until success || counter > RETRY_COUNT
             counter += 1
             CustomLogger.log.info "Waiting for service principal to be available in directory (retry #{counter})"
             sleep 2
@@ -261,6 +266,7 @@ module Azure
           end
           raise 'Failed to assign Service Principal to Role' unless success
           CustomLogger.log.info "Assigned service principal to role #{role_name} in subscription #{subscription}"
+
           new_credentials = {}
           new_credentials[:subscription_id] = subscription
           new_credentials[:client_id] = application_id
@@ -268,6 +274,7 @@ module Azure
           new_credentials[:tenant_id] = tenant_id
           credentials.push(new_credentials)
         end
+
         credentials
       end
 
