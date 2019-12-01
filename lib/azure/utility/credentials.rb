@@ -52,6 +52,13 @@ module Azure
              required: false,
              default: 'chef'
 
+      option :app_name,
+             short: '-n',
+             long: '--name APP_NAME',
+             description: 'Name for new app registration used by service principal (default: azure_<random>_<subscription_id>)',
+             default: :auto_name,
+             required: false
+
       option :log_level,
              short: '-l',
              long: '--log_level LEVEL',
@@ -238,7 +245,11 @@ module Azure
         identifier = SecureRandom.hex(2)
         credentials = []
         subscriptions.each do |subscription|
-          new_application_name = "azure_#{identifier}_#{subscription}"
+          if config[:app_name] == :auto_name then
+            new_application_name = "azure_#{identifier}_#{subscription}"
+          else
+            new_application_name = config[:app_name]
+          end
 
           if config[:type] == 'azurecli' then
             new_client_secret = SecureRandom.uuid
